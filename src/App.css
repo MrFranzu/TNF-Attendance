@@ -1,0 +1,19 @@
+.App {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center content horizontally */
+  justify-content: flex-start; /* Align content to the top */
+  height: 100vh; /* Full viewport height */
+  padding: 10px;
+}
+
+.left-side {
+  margin-bottom: 20px; /* Adds space below the image */
+  position: relative; /* Allows positioning of the image above center */
+  top: 0; /* Keeps the image at the top of the container */
+}
+
+.left-side img {
+  width: 100px; /* Set image width (adjust as needed) */
+  height: auto;
+}
