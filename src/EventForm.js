@@ -5,26 +5,48 @@ const EventForm = () => {
   const [aname, setAname] = useState('');
   const [numPeople, setNumPeople] = useState('');
   const [eventCode, setEventCode] = useState('');
-  const [qrCode, setQrCode] = useState('');
+  const [attendees, setAttendees] = useState([]);
+  const [qrCode, setQrCode] = useState('');  
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!aname || !numPeople || !eventCode) {
-      setErrorMessage('All fields are required.');
+  const handleAddAttendee = () => {
+    if (!aname || !numPeople) {
+      setErrorMessage('Name and number of people are required.');
       return;
     }
 
-    const qrData = JSON.stringify({
-      eventCode,
+    const newAttendee = {
       name: aname,
       numPeople: parseInt(numPeople, 10),
-    });
+    };
 
-    setQrCode(qrData); // Generate QR code for display
+    setAttendees([...attendees, newAttendee]);
+    setAname('');
+    setNumPeople('');
     setErrorMessage('');
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  
+    if (!eventCode || attendees.length === 0) {
+      setErrorMessage('Event code and at least one attendee are required.');
+      return;
+    }
+  
+    const totalPeople = attendees.reduce((sum, attendee) => sum + attendee.numPeople, 0);
+    const qrData = JSON.stringify({
+      eventCode,
+      attendees,
+      totalPeople,
+    });
+  
+    setErrorMessage('');
+    setAttendees([]); 
+    setEventCode('');
+    setQrCode(qrData); 
+  };
+  
 
   return (
     <div style={styles.container}>
@@ -45,6 +67,13 @@ const EventForm = () => {
             placeholder="Enter number of people"
             style={styles.input}
           />
+          <button
+            type="button"
+            onClick={handleAddAttendee}
+            style={styles.button}
+          >
+            Add Attendee
+          </button>
           <input
             type="text"
             value={eventCode}
@@ -57,6 +86,19 @@ const EventForm = () => {
             Generate QR Code
           </button>
         </form>
+
+        <div style={styles.attendeesList}>
+          {attendees.length > 0 && (
+            <ul style={styles.list}>
+              {attendees.map((attendee, index) => (
+                <li key={index} style={styles.listItem}>
+                  {attendee.name} - {attendee.numPeople} people
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <div style={styles.qrContainer}>
           {qrCode && (
             <>
@@ -84,7 +126,7 @@ const styles = {
   },
   header: {
     textAlign: 'center',
-    color: '#6A1B9A', // Violet color
+    color: '#6A1B9A', 
     fontSize: '2.5rem',
     marginBottom: '40px',
   },
@@ -92,14 +134,14 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    gap: '40px', // Add space between form and QR code
-    flexDirection: 'row', // Default to row on larger screens
+    gap: '40px', 
+    flexDirection: 'row',
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
     gap: '20px',
-    flex: '1', // Take up remaining space
+    flex: '1',
     padding: '30px',
     backgroundColor: '#ffffff',
     borderRadius: '8px',
@@ -110,13 +152,13 @@ const styles = {
     fontSize: '1.2rem',
     border: '1px solid #DDD',
     borderRadius: '4px',
-    backgroundColor: '#F3E5F5', // Light violet
-    color: '#4A148C', // Dark violet
+    backgroundColor: '#F3E5F5', 
+    color: '#4A148C',
     outline: 'none',
   },
   button: {
     padding: '15px',
-    background: '#8E24AA', // Darker violet
+    background: '#8E24AA', 
     color: '#fff',
     cursor: 'pointer',
     border: 'none',
@@ -124,11 +166,8 @@ const styles = {
     fontSize: '1.2rem',
     transition: 'background-color 0.3s ease',
   },
-  buttonHover: {
-    background: '#6A1B9A', // Even darker violet on hover
-  },
   error: {
-    color: '#D32F2F', // Red error color
+    color: '#D32F2F', 
     fontSize: '1rem',
     textAlign: 'center',
   },
@@ -136,66 +175,28 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    flex: '0 1 300px', // Limit QR code container size
+    flex: '0 1 300px',
     height: '100%',
-    flexDirection: 'column', // Stack the QR code and instruction text
+    flexDirection: 'column',
     alignItems: 'center',
   },
   qrInstruction: {
     fontSize: '1.1rem',
     fontWeight: 'bold',
-    color: '#4A148C', // Dark violet
-    marginBottom: '15px', // Space between the instruction and QR code
+    color: '#4A148C', 
+    marginBottom: '15px',
     textAlign: 'center',
   },
-  // Media queries for responsiveness
-  '@media (max-width: 768px)': {
-    container: {
-      padding: '20px',
-    },
-    header: {
-      fontSize: '2rem',
-      marginBottom: '20px',
-    },
-    formContainer: {
-      flexDirection: 'column', // Stack form and QR on smaller screens
-      gap: '20px', // Adjust gap
-    },
-    form: {
-      padding: '20px',
-    },
-    input: {
-      fontSize: '1rem',
-      padding: '12px',
-    },
-    button: {
-      fontSize: '1rem',
-      padding: '12px',
-    },
-    qrContainer: {
-      flex: '1 1 100%', // QR code container takes full width
-      justifyContent: 'center',
-    },
-    qrInstruction: {
-      fontSize: '1rem',
-    },
+  attendeesList: {
+    marginTop: '20px',
   },
-
-  '@media (max-width: 480px)': {
-    header: {
-      fontSize: '1.6rem',
-    },
-    input: {
-      fontSize: '0.9rem',
-      padding: '10px',
-    },
-    button: {
-      fontSize: '1rem',
-      padding: '10px',
-    },
-    qrInstruction: {
-      fontSize: '0.9rem',
-    },
+  list: {
+    listStyleType: 'none',
+    paddingLeft: '0',
+  },
+  listItem: {
+    fontSize: '1.1rem',
+    color: '#4A148C',
   },
 };
 
